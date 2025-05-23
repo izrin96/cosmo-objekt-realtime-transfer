@@ -1,0 +1,27 @@
+{
+  "name": "cosmo-objekt-realtime-transfer",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/app.js",
+    "dev": "tsx src/app.ts",
+    "dev:ws": "tsx src/ws.ts"
+  },
+  "dependencies": {
+    "@envio-dev/hypersync-client": "^0.6.5",
+    "@hono/node-server": "^1.14.2",
+    "dotenv": "^16.5.0",
+    "drizzle-orm": "^0.43.1",
+    "hono": "^4.7.10",
+    "ofetch": "^1.4.1",
+    "pg": "^8.16.0",
+    "ws": "^8.18.2",
+    "zod": "^3.25.27"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.21",
+    "@types/ws": "^8.18.1",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  }
+}

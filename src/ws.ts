@@ -8,9 +8,19 @@ const app = new Hono();
 const wss = new WebSocketServer({ noServer: true });
 
 const clients = new Set<WebSocket>();
+const transferHistory: any[] = [];
+const MAX_HISTORY = 500;
 
 wss.on("connection", (ws) => {
   clients.add(ws);
+
+  if (transferHistory.length > 0) {
+    const historyMessage = {
+      type: "history",
+      data: transferHistory,
+    };
+    ws.send(JSON.stringify(historyMessage));
+  }
 
   ws.on("close", () => {
     clients.delete(ws);
@@ -19,6 +29,14 @@ wss.on("connection", (ws) => {
 
 export function broadcast(message: any) {
   const messageStr = JSON.stringify(message);
+
+  if (message.type === "transfer") {
+    transferHistory.unshift(message.data);
+    if (transferHistory.length > MAX_HISTORY) {
+      transferHistory.pop();
+    }
+  }
+
   clients.forEach((client) => {
     if (client.readyState === WebSocket.OPEN) {
       client.send(messageStr);

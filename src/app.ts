@@ -11,10 +11,15 @@ import { fetchMetadata } from "./cosmo";
 import { broadcast } from "./ws";
 import { randomUUID } from "node:crypto";
 import { fetchKnownAddresses } from "./lib/utils";
+import { connectRedis } from "./lib/redis";
 
 const CONTRACT_ADDRESS = "0x99Bb83AE9bb0C0A6be865CaCF67760947f91Cb70";
 
 async function main() {
+  // Connect to Redis
+  await connectRedis();
+  console.log("Connected to Redis");
+
   // Create hypersync client using the mainnet hypersync endpoint
   const client = HypersyncClient.new({
     url: "https://abstract.hypersync.xyz",

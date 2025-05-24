@@ -2,22 +2,23 @@ import { Hono } from "hono";
 import { serve } from "@hono/node-server";
 import { WebSocketServer, WebSocket } from "ws";
 import { IncomingMessage } from "http";
+import { redis, TRANSFER_HISTORY_KEY, MAX_HISTORY } from "./lib/redis";
 
 const app = new Hono();
 
 const wss = new WebSocketServer({ noServer: true });
 
 const clients = new Set<WebSocket>();
-const transferHistory: any[] = [];
-const MAX_HISTORY = 500;
 
-wss.on("connection", (ws) => {
+wss.on("connection", async (ws) => {
   clients.add(ws);
 
-  if (transferHistory.length > 0) {
+  // Send transfer history to new client
+  const history = await redis.lRange(TRANSFER_HISTORY_KEY, 0, -1);
+  if (history.length > 0) {
     const historyMessage = {
       type: "history",
-      data: transferHistory,
+      data: history.map((item) => JSON.parse(item)),
     };
     ws.send(JSON.stringify(historyMessage));
   }
@@ -27,14 +28,14 @@ wss.on("connection", (ws) => {
   });
 });
 
-export function broadcast(message: any) {
+export async function broadcast(message: any) {
   const messageStr = JSON.stringify(message);
 
   if (message.type === "transfer") {
-    transferHistory.unshift(message.data);
-    if (transferHistory.length > MAX_HISTORY) {
-      transferHistory.pop();
-    }
+    // Store transfer event in Redis
+    await redis.lPush(TRANSFER_HISTORY_KEY, JSON.stringify(message.data));
+    // Trim the list to keep only the last MAX_HISTORY events
+    await redis.lTrim(TRANSFER_HISTORY_KEY, 0, MAX_HISTORY - 1);
   }
 
   clients.forEach((client) => {

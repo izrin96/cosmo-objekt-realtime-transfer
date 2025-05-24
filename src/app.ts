@@ -117,11 +117,11 @@ async function main() {
               class: metadata.objekt.class,
               collectionId: metadata.objekt.collectionId,
               collectionNo: metadata.objekt.collectionNo,
-              createdAt: new Date(), // todo: maybe will get from cached collection
+              // createdAt: new Date(), // todo: maybe will get from cached collection
               frontImage: metadata.objekt.frontImage,
               id: tokenId.toString(),
               member: metadata.objekt.member,
-              mintedAt: new Date(), // todo: maybe will get from cached objekt
+              // mintedAt: new Date(), // todo: maybe will get from cached objekt
               onOffline: metadata.objekt.collectionNo.includes("Z")
                 ? "online"
                 : "offline",

@@ -2,7 +2,7 @@
   "name": "cosmo-objekt-realtime-transfer",
   "version": "1.0.0",
   "scripts": {
-    "build": "tsc",
+    "build": "rm -rf dist && tsc",
     "start": "node dist/app.js",
     "dev": "tsx src/app.ts",
     "dev:ws": "tsx src/ws.ts"

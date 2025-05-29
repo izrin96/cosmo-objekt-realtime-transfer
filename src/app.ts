@@ -11,15 +11,10 @@ import { fetchMetadata } from "./cosmo";
 import { broadcast } from "./ws";
 import { randomUUID } from "node:crypto";
 import { fetchKnownAddresses } from "./lib/utils";
-import { connectRedis } from "./lib/redis";
 
 const CONTRACT_ADDRESS = "0x99Bb83AE9bb0C0A6be865CaCF67760947f91Cb70";
 
 async function main() {
-  // Connect to Redis
-  await connectRedis();
-  console.log("Connected to Redis");
-
   // Create hypersync client using the mainnet hypersync endpoint
   const client = HypersyncClient.new({
     url: "https://abstract.hypersync.xyz",
@@ -90,6 +85,19 @@ async function main() {
         const timestamp = blockTimestamps.get(blockNumber);
         const blockTimestamp = new Date(Number(timestamp) * 1000);
 
+        console.log(`Token ${tokenId} from ${from} to ${to}`);
+
+        const knownAddresses = await fetchKnownAddresses([from, to]);
+        const fromUser = knownAddresses.find(
+          (a) => a.address.toLowerCase() === from.toLowerCase()
+        );
+        const toUser = knownAddresses.find(
+          (a) => a.address.toLowerCase() === to.toLowerCase()
+        );
+
+        if (fromUser?.hideActivity === true || toUser?.hideActivity === true)
+          continue;
+
         const metadata = await fetchMetadata(tokenId.toString());
 
         const slug = metadata.objekt.collectionId
@@ -102,12 +110,13 @@ async function main() {
           // replace spaces with hyphens
           .replace(/\s+/g, "-");
 
-        const nicknames = await fetchKnownAddresses([from, to]);
-
         const transferEvent = {
           type: "transfer",
           data: {
-            nicknames: nicknames,
+            user: {
+              from: fromUser,
+              to: toUser,
+            },
             transfer: {
               id: randomUUID(),
               from,
@@ -142,10 +151,6 @@ async function main() {
 
         // Broadcast the transfer event to all connected clients
         broadcast(transferEvent);
-
-        console.log(
-          `Objekt ${metadata.objekt.collectionId} #${metadata.objekt.objektNo} from ${from} to ${to}`
-        );
       }
     }
 

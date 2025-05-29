@@ -114,8 +114,12 @@ async function main() {
           type: "transfer",
           data: {
             user: {
-              from: fromUser,
-              to: toUser,
+              from: fromUser
+                ? { nickname: fromUser.nickname, address: fromUser.address }
+                : undefined,
+              to: toUser
+                ? { nickname: toUser.nickname, address: toUser.address }
+                : undefined,
             },
             transfer: {
               id: randomUUID(),

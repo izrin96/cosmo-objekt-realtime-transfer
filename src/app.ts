@@ -71,6 +71,17 @@ async function main() {
       // Can also use decoder.decodeLogsSync if it is more convenient.
       const decodedLogs = await decoder.decodeLogs(res.data.logs);
 
+      const addresses = decodedLogs
+        .filter((a) => a !== null && a !== undefined)
+        .map((log) => {
+          const from = log.indexed[0].val as string;
+          const to = log.indexed[1].val as string;
+          return [from, to];
+        })
+        .flatMap((a) => a);
+
+      const knownAddresses = await fetchKnownAddresses(addresses);
+
       for (let i = 0; i < decodedLogs.length; i++) {
         const log = decodedLogs[i];
         if (log === null || log === undefined) {
@@ -87,7 +98,6 @@ async function main() {
 
         console.log(`Token ${tokenId} from ${from} to ${to}`);
 
-        const knownAddresses = await fetchKnownAddresses([from, to]);
         const fromUser = knownAddresses.find(
           (a) => a.address.toLowerCase() === from.toLowerCase()
         );

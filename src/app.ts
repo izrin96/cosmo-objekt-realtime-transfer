@@ -11,6 +11,7 @@ import { fetchMetadata } from "./cosmo";
 import { broadcast } from "./ws";
 import { randomUUID } from "node:crypto";
 import { fetchKnownAddresses } from "./lib/utils";
+import { overrideColor } from "./lib/objekt";
 
 const CONTRACT_ADDRESS = "0x99Bb83AE9bb0C0A6be865CaCF67760947f91Cb70";
 
@@ -141,7 +142,6 @@ async function main() {
             objekt: {
               artist: metadata.objekt.artists[0].toLowerCase(),
               backImage: metadata.objekt.backImage,
-              backgroundColor: metadata.objekt.backgroundColor,
               class: metadata.objekt.class,
               collectionId: metadata.objekt.collectionId,
               collectionNo: metadata.objekt.collectionNo,
@@ -157,8 +157,12 @@ async function main() {
               season: metadata.objekt.season,
               serial: metadata.objekt.objektNo,
               slug: slug,
-              textColor: metadata.objekt.textColor,
               transferable: metadata.objekt.transferable,
+              ...overrideColor({
+                slug,
+                backgroundColor: metadata.objekt.backgroundColor,
+                textColor: metadata.objekt.textColor,
+              }),
             },
           },
         };

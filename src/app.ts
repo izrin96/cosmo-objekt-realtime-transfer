@@ -169,6 +169,7 @@ async function main() {
 
       // Broadcast all transfer events together if there are any
       if (transferEvents.length > 0) {
+        transferEvents.reverse();
         broadcast({
           type: "transfer",
           data: transferEvents,

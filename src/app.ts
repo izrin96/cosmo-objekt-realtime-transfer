@@ -83,6 +83,8 @@ async function main() {
 
       const knownAddresses = await fetchKnownAddresses(addresses);
 
+      const transferEvents = [];
+
       for (let i = 0; i < decodedLogs.length; i++) {
         const log = decodedLogs[i];
         if (log === null || log === undefined) {
@@ -122,53 +124,55 @@ async function main() {
           .replace(/\s+/g, "-");
 
         const transferEvent = {
-          type: "transfer",
-          data: {
-            user: {
-              from: fromUser
-                ? { nickname: fromUser.nickname, address: fromUser.address }
-                : undefined,
-              to: toUser
-                ? { nickname: toUser.nickname, address: toUser.address }
-                : undefined,
-            },
-            transfer: {
-              id: randomUUID(),
-              from,
-              to,
-              timestamp: blockTimestamp,
-              tokenId: tokenId.toString(),
-            },
-            objekt: {
-              artist: metadata.objekt.artists[0].toLowerCase(),
-              backImage: metadata.objekt.backImage,
-              class: metadata.objekt.class,
-              collectionId: metadata.objekt.collectionId,
-              collectionNo: metadata.objekt.collectionNo,
-              // createdAt: new Date(), // todo: maybe will get from cached collection
-              frontImage: metadata.objekt.frontImage,
-              id: tokenId.toString(),
-              member: metadata.objekt.member,
-              // mintedAt: new Date(), // todo: maybe will get from cached objekt
-              onOffline: metadata.objekt.collectionNo.includes("Z")
-                ? "online"
-                : "offline",
-              receivedAt: blockTimestamp,
-              season: metadata.objekt.season,
-              serial: metadata.objekt.objektNo,
-              slug: slug,
-              transferable: metadata.objekt.transferable,
-              ...overrideColor({
-                slug,
-                backgroundColor: metadata.objekt.backgroundColor,
-                textColor: metadata.objekt.textColor,
-              }),
-            },
+          user: {
+            from: fromUser
+              ? { nickname: fromUser.nickname, address: fromUser.address }
+              : undefined,
+            to: toUser
+              ? { nickname: toUser.nickname, address: toUser.address }
+              : undefined,
+          },
+          transfer: {
+            id: randomUUID(),
+            from,
+            to,
+            timestamp: blockTimestamp,
+            tokenId: tokenId.toString(),
+          },
+          objekt: {
+            artist: metadata.objekt.artists[0].toLowerCase(),
+            backImage: metadata.objekt.backImage,
+            class: metadata.objekt.class,
+            collectionId: metadata.objekt.collectionId,
+            collectionNo: metadata.objekt.collectionNo,
+            frontImage: metadata.objekt.frontImage,
+            id: tokenId.toString(),
+            member: metadata.objekt.member,
+            onOffline: metadata.objekt.collectionNo.includes("Z")
+              ? "online"
+              : "offline",
+            receivedAt: blockTimestamp,
+            season: metadata.objekt.season,
+            serial: metadata.objekt.objektNo,
+            slug: slug,
+            transferable: metadata.objekt.transferable,
+            ...overrideColor({
+              slug,
+              backgroundColor: metadata.objekt.backgroundColor,
+              textColor: metadata.objekt.textColor,
+            }),
           },
         };
 
-        // Broadcast the transfer event to all connected clients
-        broadcast(transferEvent);
+        transferEvents.push(transferEvent);
+      }
+
+      // Broadcast all transfer events together if there are any
+      if (transferEvents.length > 0) {
+        broadcast({
+          type: "transfer",
+          data: transferEvents,
+        });
       }
     }
 

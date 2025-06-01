@@ -12,3 +12,4 @@ export async function connectRedis() {
 }
 
 export const TRANSFER_HISTORY_KEY = "transfer:history";
+export const MAX_HISTORY = 500;

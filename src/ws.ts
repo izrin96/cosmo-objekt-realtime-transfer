@@ -2,7 +2,6 @@ import { Hono } from "hono";
 import { serve } from "@hono/node-server";
 import { WebSocketServer, WebSocket } from "ws";
 import { IncomingMessage } from "http";
-import { redis, TRANSFER_HISTORY_KEY } from "./lib/redis";
 
 const app = new Hono();
 
@@ -13,44 +12,14 @@ const clients = new Set<WebSocket>();
 wss.on("connection", async (ws) => {
   clients.add(ws);
 
-  ws.on("message", (message: string) => {
-    const data = JSON.parse(message);
-    if (data.type === "history_request") {
-      const date = new Date(data.timestamp);
-
-      redis.lRange(TRANSFER_HISTORY_KEY, 0, -1).then((history) => {
-        if (history.length > 0) {
-          const filteredHistory = history
-            .map((item) => JSON.parse(item))
-            .filter((item) => new Date(item.transfer.timestamp) > date);
-
-          const historyMessage = {
-            type: "history",
-            data: filteredHistory,
-          };
-          ws.send(JSON.stringify(historyMessage));
-        }
-      });
-    }
-  });
-
   ws.on("close", () => {
     clients.delete(ws);
   });
 });
 
-export async function broadcast<T>(message: { type: string; data: T[] }) {
-  if (message.type === "transfer") {
-    await redis.lPush(
-      TRANSFER_HISTORY_KEY,
-      // should be ascending order with lPush
-      message.data.toReversed().map((a) => JSON.stringify(a))
-    );
-    await redis.lTrim(TRANSFER_HISTORY_KEY, 0, 30);
-  }
-
-  // should send descending order
+export async function broadcast(message: any) {
   const messageStr = JSON.stringify(message);
+
   clients.forEach((client) => {
     if (client.readyState === WebSocket.OPEN) {
       client.send(messageStr);

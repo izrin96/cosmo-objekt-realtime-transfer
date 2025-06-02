@@ -71,9 +71,9 @@ async function main() {
       // Decode the log on a background thread so we don't block the event loop.
       // Can also use decoder.decodeLogsSync if it is more convenient.
       const decodedLogs = await decoder.decodeLogs(res.data.logs);
+      const logs = decodedLogs.filter((a) => a !== null && a !== undefined);
 
-      const addresses = decodedLogs
-        .filter((a) => a !== null && a !== undefined)
+      const addresses = logs
         .map((log) => {
           const from = log.indexed[0].val as string;
           const to = log.indexed[1].val as string;
@@ -81,15 +81,26 @@ async function main() {
         })
         .flatMap((a) => a);
 
+      const metadataBatch = await Promise.allSettled(
+        logs.map((log) => {
+          const tokenId = log.indexed[2].val as bigint;
+          return fetchMetadata(tokenId.toString());
+        })
+      );
+
       const knownAddresses = await fetchKnownAddresses(addresses);
 
       const transferEvents = [];
 
-      for (let i = 0; i < decodedLogs.length; i++) {
-        const log = decodedLogs[i];
-        if (log === null || log === undefined) {
+      for (let i = 0; i < logs.length; i++) {
+        const metadataResult = metadataBatch[i];
+
+        if (metadataResult.status !== "fulfilled") {
           continue;
         }
+
+        const log = logs[i];
+        const metadata = metadataResult.value;
 
         const from = log.indexed[0].val as string;
         const to = log.indexed[1].val as string;
@@ -110,8 +121,6 @@ async function main() {
 
         if (fromUser?.hideActivity === true || toUser?.hideActivity === true)
           continue;
-
-        const metadata = await fetchMetadata(tokenId.toString());
 
         const slug = metadata.objekt.collectionId
           .toLowerCase()

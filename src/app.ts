@@ -12,10 +12,15 @@ import { broadcast } from "./ws";
 import { randomUUID } from "node:crypto";
 import { fetchKnownAddresses } from "./lib/utils";
 import { overrideColor } from "./lib/objekt";
+import { connectRedis } from "./lib/redis";
 
 const CONTRACT_ADDRESS = "0x99Bb83AE9bb0C0A6be865CaCF67760947f91Cb70";
 
 async function main() {
+  // Connect to Redis
+  await connectRedis();
+  console.log("Connected to Redis");
+
   // Create hypersync client using the mainnet hypersync endpoint
   const client = HypersyncClient.new({
     url: "https://abstract.hypersync.xyz",
@@ -178,6 +183,7 @@ async function main() {
 
       // Broadcast all transfer events together if there are any
       if (transferEvents.length > 0) {
+        // broadcast in descending order
         transferEvents.reverse();
         broadcast({
           type: "transfer",

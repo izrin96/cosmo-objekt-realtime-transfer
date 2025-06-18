@@ -53,6 +53,7 @@ async function main() {
         LogField.Topic2,
         LogField.Topic3,
         LogField.BlockNumber,
+        LogField.TransactionHash,
       ],
       block: [BlockField.Timestamp, BlockField.Number],
     },
@@ -111,6 +112,7 @@ async function main() {
         const to = log.indexed[1].val as string;
         const tokenId = log.indexed[2].val as bigint;
         const blockNumber = res.data.logs[i].blockNumber;
+        const hash = res.data.logs[i].transactionHash;
 
         const timestamp = blockTimestamps.get(blockNumber);
         const blockTimestamp = new Date(Number(timestamp) * 1000);
@@ -152,6 +154,7 @@ async function main() {
             to,
             timestamp: blockTimestamp,
             tokenId: tokenId.toString(),
+            hash,
           },
           objekt: {
             artist: metadata.objekt.artists[0].toLowerCase(),

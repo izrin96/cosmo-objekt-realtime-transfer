@@ -9,20 +9,20 @@
   },
   "dependencies": {
     "@envio-dev/hypersync-client": "^0.6.5",
-    "@hono/node-server": "^1.14.2",
-    "dotenv": "^16.5.0",
-    "drizzle-orm": "^0.43.1",
-    "hono": "^4.7.10",
+    "@hono/node-server": "^1.16.0",
+    "dotenv": "^17.2.0",
+    "drizzle-orm": "^0.44.3",
+    "hono": "^4.8.5",
     "ofetch": "^1.4.1",
-    "pg": "^8.16.0",
-    "redis": "^4.6.13",
-    "ws": "^8.18.2",
-    "zod": "^3.25.27"
+    "pg": "^8.16.3",
+    "redis": "^5.6.0",
+    "ws": "^8.18.3",
+    "zod": "^4.0.5"
   },
   "devDependencies": {
-    "@types/node": "^22.15.21",
+    "@types/node": "^24.0.14",
     "@types/ws": "^8.18.1",
-    "tsx": "^4.19.4",
+    "tsx": "^4.20.3",
     "typescript": "^5.8.3"
   }
 }

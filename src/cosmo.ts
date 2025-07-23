@@ -1,11 +1,10 @@
 import { ofetch } from "ofetch";
 
-/* Code from teamreflex/cosmo-db */
-
 export async function fetchMetadata(tokenId: string) {
   try {
     return await fetchMetadataV1(tokenId);
   } catch (error) {
+    console.log(`[fetchMetadata] Error fetching v1 metadata: ${error}`);
     const v3 = await fetchMetadataV3(tokenId);
     return normalizeV3(v3, tokenId);
   }
@@ -41,12 +40,10 @@ export type MetadataV1 = {
  * Fetch objekt metadata from the v1 API.
  */
 export async function fetchMetadataV1(tokenId: string) {
-  return await ofetch<MetadataV1>(
-    `https://api.cosmo.fans/objekt/v1/token/${tokenId}`,
-    {
-      retry: 1,
-    }
-  );
+  return await ofetch<MetadataV1>(`https://api.cosmo.fans/objekt/v1/token/${tokenId}`, {
+    retry: 3,
+    retryDelay: 500, // 500ms backoff
+  });
 }
 
 type MetadataV3 = {
@@ -64,13 +61,10 @@ type MetadataV3 = {
  * Fetch objekt metadata from the v3 API.
  */
 export async function fetchMetadataV3(tokenId: string) {
-  return await ofetch<MetadataV3>(
-    `https://api.cosmo.fans/bff/v3/objekts/nft-metadata/${tokenId}`,
-    {
-      retry: 2,
-      retryDelay: 500, // 500ms backoff
-    }
-  );
+  return await ofetch<MetadataV3>(`https://api.cosmo.fans/bff/v3/objekts/nft-metadata/${tokenId}`, {
+    retry: 2,
+    retryDelay: 500, // 500ms backoff
+  });
 }
 
 /**
@@ -84,7 +78,7 @@ export function normalizeV3(metadata: MetadataV3, tokenId: string): MetadataV1 {
   const collection = getTrait(metadata, tokenId, "Collection");
 
   const thumbnail = metadata.image.replace(/\/(4x|original)/, "/thumbnail");
-  const comoAmount = className === "Double" ? 2 : 1;
+  const comoAmount = ["Double", "Premier"].includes(className) ? 2 : 1;
 
   return {
     name: metadata.name,
@@ -106,7 +100,7 @@ export function normalizeV3(metadata: MetadataV3, tokenId: string): MetadataV1 {
       // not possible to get from v3
       backImage: "",
       accentColor: "",
-      textColor: "",
+      textColor: "#000000",
       objektNo: 0,
       tokenAddress: "",
       transferable: false,
@@ -120,9 +114,7 @@ export function normalizeV3(metadata: MetadataV3, tokenId: string): MetadataV1 {
 function getTrait(metadata: MetadataV3, tokenId: string, trait: string) {
   const attr = metadata.attributes.find((attr) => attr.trait_type === trait);
   if (!attr) {
-    throw new Error(
-      `[normalizeV3] Trait ${trait} not found for token ${tokenId}`
-    );
+    throw new Error(`[normalizeV3] Trait ${trait} not found for token ${tokenId}`);
   }
   return attr.value;
 }

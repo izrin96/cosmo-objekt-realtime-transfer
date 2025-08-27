@@ -7,7 +7,7 @@ export async function fetchKnownAddresses(addresses: string[]) {
     .select({
       address: userAddress.address,
       nickname: userAddress.nickname,
-      hideActivity: userAddress.hideActivity,
+      hideNickname: userAddress.hideNickname,
     })
     .from(userAddress)
     .where(

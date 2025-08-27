@@ -126,9 +126,6 @@ async function main() {
           (a) => a.address.toLowerCase() === to.toLowerCase()
         );
 
-        if (fromUser?.hideActivity === true || toUser?.hideActivity === true)
-          continue;
-
         const slug = metadata.objekt.collectionId
           .toLowerCase()
           // replace diacritics
@@ -141,12 +138,8 @@ async function main() {
 
         const transferEvent = {
           user: {
-            from: fromUser
-              ? { nickname: fromUser.nickname, address: fromUser.address }
-              : undefined,
-            to: toUser
-              ? { nickname: toUser.nickname, address: toUser.address }
-              : undefined,
+            from: { address: from, nickname: fromUser?.nickname },
+            to: { address: to, nickname: toUser?.nickname },
           },
           transfer: {
             id: randomUUID(),

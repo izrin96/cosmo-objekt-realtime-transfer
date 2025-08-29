@@ -137,9 +137,9 @@ async function main() {
           .replace(/\s+/g, "-");
 
         const transferEvent = {
-          user: {
-            from: { address: from, nickname: fromUser?.nickname },
-            to: { address: to, nickname: toUser?.nickname },
+          nickname: {
+            from: fromUser?.nickname,
+            to: toUser?.nickname,
           },
           transfer: {
             id: randomUUID(),

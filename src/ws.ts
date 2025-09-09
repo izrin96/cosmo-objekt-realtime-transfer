@@ -1,8 +1,10 @@
 import { Hono } from "hono";
+import { cors } from "hono/cors";
 import { serve } from "@hono/node-server";
 import { WebSocketServer, WebSocket } from "ws";
 import { IncomingMessage } from "http";
 import { MAX_HISTORY, redis, TRANSFER_HISTORY_KEY } from "./lib/redis";
+import { env } from "./env";
 
 const app = new Hono();
 
@@ -49,6 +51,11 @@ export async function broadcast<T>(message: { type: string; data: T[] }) {
   });
 }
 
+app.use(
+  cors({
+    origin: env.CORS_ORIGIN ?? "*",
+  })
+);
 app.get("/", (c) => c.text("WebSocket server is running"));
 
 const port = 3001;

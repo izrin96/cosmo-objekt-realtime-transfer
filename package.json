@@ -8,22 +8,22 @@
     "dev:ws": "tsx src/ws.ts"
   },
   "dependencies": {
-    "@envio-dev/hypersync-client": "^0.6.5",
-    "@hono/node-server": "^1.18.1",
-    "dotenv": "^17.2.1",
-    "drizzle-orm": "^0.44.4",
-    "hono": "^4.8.12",
+    "@envio-dev/hypersync-client": "^0.6.6",
+    "@hono/node-server": "^1.19.1",
+    "dotenv": "^17.2.2",
+    "drizzle-orm": "^0.44.5",
+    "hono": "^4.9.6",
     "ofetch": "^1.4.1",
     "pg": "^8.16.3",
-    "redis": "^5.7.0",
+    "redis": "^5.8.2",
     "ws": "^8.18.3",
-    "zod": "^4.0.14"
+    "zod": "^4.1.5"
   },
   "devDependencies": {
-    "@types/node": "^24.1.0",
+    "@types/node": "^24.3.1",
     "@types/ws": "^8.18.1",
-    "tsx": "^4.20.3",
+    "tsx": "^4.20.5",
     "typescript": "^5.9.2"
   },
-  "packageManager": "pnpm@10.14.0"
+  "packageManager": "pnpm@10.15.1"
 }
